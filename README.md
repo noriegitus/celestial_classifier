@@ -29,6 +29,19 @@ celestial_classifier/
 └── requirements.txt
 ```
 
+## 📥 Descarga de Datos
+Este proyecto utiliza datos del proyecto [Galaxy Zoo 2](https://data.galaxyzoo.org/).
+
+Para poder replicar este clasificador, necesitas descargar los siguientes archivos:
+
+1. Imágenes del dataset (`images_gz2.zip`)
+   - URL directa: https://data.galaxyzoo.org/gz2_images/images_gz2.zip
+2. Archivo de etiquetas: [`gz2_hart16.csv`](https://data.galaxyzoo.org/gz2_hart16.csv)
+3. Archivo de mapeo: [`gz2_filename_mapping.csv`](https://data.galaxyzoo.org/gz2_filename_mapping.csv)
+
+📁 Una vez descargados, descomprime `images_gz2.zip` en la ruta:
+```"data/raw/images_gz2/"```
+
 ## 🚀 Instrucciones de Uso
 1. **Instalar** Dependencias
 ```bash
