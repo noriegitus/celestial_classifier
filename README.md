@@ -5,6 +5,7 @@ Este proyecto busca entrenar un modelo de clasificación de galaxias usando deep
 
 
 ## 📁 Estructura del Proyecto
+```bash
 celestial_classifier/
 │
 ├── data/
@@ -26,6 +27,7 @@ celestial_classifier/
 ├── sql/ # Consultas SQL
 ├── README.md
 └── requirements.txt
+```
 
 ## 🚀 Instrucciones de Uso
 1. **Instalar** Dependencias
