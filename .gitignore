@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pth
+*.pkl
+*.pt
+*.h5
+.env
+.vscode/
+data/
+models/
+dashboard/
