@@ -3,7 +3,7 @@
 import os
 import time
 import torch
-import torch.nn as nn
+import torch.nn as nn   
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 def main():
     # 1. PATH CONFIG -------------------------------------------
     BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    DATA_DIR = os.path.join(BASE, "data", "processed", "train_set")
+    DATA_DIR = os.path.join(BASE, "data", "processed", "train_set_balanced")
     MODEL_PATH = os.path.join(BASE, "models", "model_v1.pth")
 
     # 2. HYPERPARAMETERS ---------------------------------------
