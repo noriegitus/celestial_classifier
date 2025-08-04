@@ -10,9 +10,9 @@ from torch.utils.data import DataLoader
 
 def main():
     # 1. PATH CONFIG -------------------------------------------
-    BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     DATA_DIR = os.path.join(BASE, "data", "processed", "train_set_balanced")
-    MODEL_PATH = os.path.join(BASE, "models", "model_v1.pth")
+    MODEL_PATH = os.path.join(BASE, "models", "pth_files", "model_cc_v1.pth")
 
     # 2. HYPERPARAMETERS ---------------------------------------
     BATCH_SIZE = 64 
@@ -88,10 +88,10 @@ def main():
                 print(f"  Batch {batch_idx + 1}/{len(dataloader)} procesado")
 
         avg_loss = running_loss / len(dataloader)
-        print(f"🧠 Época {epoch + 1}/{EPOCHS} | Pérdida Promedio: {avg_loss:.4f} | Tiempo: {time.time() - epoch_start:.2f}s")
+        print(f"Época {epoch + 1}/{EPOCHS} | Pérdida Promedio: {avg_loss:.4f} | Tiempo: {time.time() - epoch_start:.2f}s")
 
     total_time = time.time() - start_time
-    print(f"\nEntrenamiento completado en {total_time:.2f} segundos.")
+    print(f"\nEntrenamiento completado en {total_time:.2f} segundos, {total_time/60:.2f} minutos")
 
     # 8. SAVE TRAINED MODEL -------------------------------------
     torch.save(model.state_dict(), MODEL_PATH)
