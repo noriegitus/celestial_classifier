@@ -6,6 +6,9 @@ from torchvision import transforms
 from PIL import Image
 import matplotlib.pyplot as plt
 import sys
+from torchvision.models import resnet18
+import time
+
 
 # ===== Configuración de rutas =====
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -13,12 +16,13 @@ sys.path.append(BASE_DIR)
 
 # ===== Configuración =====
 MODEL_PATH = os.path.join(BASE_DIR, "models", "pth_files", "model_resnet18_v3.pth")
-IMG_TYPE = "simples" # o "simples"
+IMG_TYPE = "simples" # o "complicado"
 IMAGE_DIR = os.path.join(BASE_DIR, "models", "inferences", "test_images",IMG_TYPE)
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 CLASS_NAMES = ['elliptical', 'spiral']
 
 # ===== Transformaciones =====
+start = time.time()
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
@@ -37,8 +41,6 @@ def load_model():
     model.eval()
     return model
 
-# También necesitamos importar resnet18
-from torchvision.models import resnet18
 
 model = load_model()
 
@@ -78,4 +80,7 @@ for filename in os.listdir(IMAGE_DIR):
         except Exception as e:
             print(f"Error procesando {filename}: {str(e)}")
 
+final = time.time()
+
+print(f"Tiempo Total: {final-start} segundos")
 print("\nPredicción completada.")

@@ -7,6 +7,15 @@ from sklearn.metrics import classification_report, confusion_matrix
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent.parent))
+
+from outputs.save_metrics_to_csv import save_metrics_to_csv
+from outputs.save_predictions_to_csv import save_predictions_to_csv
+
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
 # === 1. CONFIGURACIÓN =====================
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "pth_files", "model_cnn_v2.pth")
@@ -62,11 +71,24 @@ model.eval()
 # === 6. EVALUACIÓN ========================
 y_true = []
 y_pred = []
+predictions = []
+
 
 with torch.no_grad():
     for inputs, labels in dataloader:
         inputs, labels = inputs.to(device), labels.to(device)
         outputs = model(inputs)
+
+        probs = torch.softmax(outputs, dim=1)
+        confidences, predicted_classes = torch.max(probs, 1)
+
+        for i in range(len(labels)):
+            predictions.append({
+                "image": dataset.samples[i][0].split(os.sep)[-1],
+                "predicted": class_names[predicted_classes[i].item()],
+                "confidence": confidences[i].item()
+        })
+
         preds = torch.argmax(outputs, dim=1)
         y_true.extend(labels.cpu().numpy())
         y_pred.extend(preds.cpu().numpy())
@@ -74,6 +96,16 @@ with torch.no_grad():
 # === 7. RESULTADOS ========================
 print("\n📊 Reporte de clasificación:\n")
 print(classification_report(y_true, y_pred, target_names=class_names))
+
+# === Guardar métricas como CSV ===
+metrics = {
+    "accuracy": accuracy_score(y_true, y_pred),
+    "precision": precision_score(y_true, y_pred),
+    "recall": recall_score(y_true, y_pred),
+    "f1_score": f1_score(y_true, y_pred)
+}
+
+save_metrics_to_csv("cnn_v2", metrics) 
 
 # === 8. MATRIZ DE CONFUSIÓN ===============
 cm = confusion_matrix(y_true, y_pred)
@@ -83,6 +115,8 @@ plt.ylabel("Real")
 plt.title("Matriz de Confusión")
 plt.tight_layout()
 plt.show()
+
+save_predictions_to_csv("cnn_v2", predictions)
 
 # === 9. PAUSA MANUAL ========================
 input("\nPresiona Enter para salir...")

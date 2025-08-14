@@ -8,6 +8,15 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent.parent))
+
+from outputs.save_metrics_to_csv import save_metrics_to_csv
+from outputs.save_predictions_to_csv import save_predictions_to_csv
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+
 # ============ CONFIGURACIÓN ============
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "pth_files", "model_resnet18_v3.pth")
@@ -39,21 +48,36 @@ model.load_state_dict(torch.load(MODEL_PATH, map_location=device, weights_only=T
 model.to(device)
 model.eval()
 
+predictions = []
+
+
 # ============ EVALUACIÓN ============
 y_true = []
 y_pred = []
+predictions = []
 
 with torch.no_grad():
     for inputs, labels in dataloader:
         inputs, labels = inputs.to(device), labels.to(device)
         outputs = model(inputs)
-        _, preds = torch.max(outputs, 1)
+
+        probs = torch.softmax(outputs, dim=1)
+        confs, preds = torch.max(probs, 1)
+        
         y_true.extend(labels.cpu().numpy())
         y_pred.extend(preds.cpu().numpy())
+
+        for i in range(len(labels)):
+            predictions.append({
+                "image": dataset.samples[i][0].split(os.sep)[-1],
+                "predicted": CLASS_NAMES[preds[i].item()],
+                "confidence": confs[i].item()
+            })
 
 # ============ REPORTE ============
 print("\n📊 Reporte de clasificación:\n")
 print(classification_report(y_true, y_pred, target_names=CLASS_NAMES))
+
 
 # ============ MATRIZ DE CONFUSIÓN ============
 cm = confusion_matrix(y_true, y_pred)
@@ -65,3 +89,13 @@ plt.ylabel("True")
 plt.title("Matriz de Confusión - ResNet18 v3")
 plt.tight_layout()
 plt.show()
+
+# === Guardar métricas ===
+metrics = {
+    "accuracy": accuracy_score(y_true, y_pred),
+    "precision": precision_score(y_true, y_pred),
+    "recall": recall_score(y_true, y_pred),
+    "f1_score": f1_score(y_true, y_pred)
+}
+save_metrics_to_csv("resnet18_v3", metrics)
+save_predictions_to_csv("resnet18_v3", predictions)

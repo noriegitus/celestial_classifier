@@ -5,6 +5,7 @@ from torchvision import transforms
 from PIL import Image
 import matplotlib.pyplot as plt
 import sys
+import time
 
 # ===== Agregar la ruta base al sys.path si es necesario =====
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -21,6 +22,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 CLASS_NAMES = ['elliptical', 'spiral']
 
 # ===== TRANSFORMACIONES =====
+start = time.time()
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
@@ -50,4 +52,7 @@ for filename in os.listdir(IMAGE_DIR):
 
         print(f"{filename} -> {predicted_label} ({confidence_percent:.2f}%)")
 
+final = time.time()
+
+print(f"Tiempo Total: {final-start} segundos")
 print("\Predicción completada.")
