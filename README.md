@@ -13,6 +13,7 @@ El núcleo del proyecto es un pipeline de datos automatizado que extrae, transfo
 celestial_classifier/
 │
 ├── dashboard/ # Power BI
+│
 ├── data/
 │  ├── raw/ # Datos crudos
 │  │  ├── images_gz2/
@@ -32,7 +33,6 @@ celestial_classifier/
 │  ├── enrich_files.py # Añade 'true_label' y 'is_correct' a las predicciones
 │  ├── load_db.py # Carga datos finales de prediccion a la base de datos
 │  └── enrich_files.py # comparar con is_correct labels
-│
 │
 ├── models/ # Pesos o modelos guardados
 │  ├── architectures
@@ -70,7 +70,7 @@ Sigue estos pasos para configurar y ejecutar el proyecto completo.
 
 **Clonar el Repositorio**
 ```
-git clone <URL_DE_TU_REPOSITORIO>
+git clone https://github.com/noriegitus/celestial_classifier.git
 cd celestial_classifier
 ```
 
