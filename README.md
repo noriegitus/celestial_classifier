@@ -43,6 +43,7 @@ celestial_classifier/
 ├── sql/ # PostgreSQL
 │  ├── architecture/
 │  └── query_scripts/
+│
 ├── README.md
 └── requirements.txt
 ```
