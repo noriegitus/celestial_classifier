@@ -1,0 +1,9 @@
+filename,true_label,predicted_label,confidence,is_correct
+AbellS740.png,elliptical,spiral,0.5765622854232788,False
+M49.png,elliptical,elliptical,0.5078269839286804,True
+M87.png,elliptical,elliptical,0.6082849502563477,True
+NGC_474.png,elliptical,spiral,0.5381758213043213,False
+MilkyWay.png,spiral,spiral,0.8677288293838501,True
+N1300.png,spiral,elliptical,0.5324881076812744,False
+NGC_6744.png,,spiral,0.9070069789886476,False
+NGC_6753.png,spiral,spiral,0.921190857887268,True

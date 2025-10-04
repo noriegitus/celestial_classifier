@@ -11,8 +11,8 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from outputs.save_metrics_to_csv import save_metrics_to_csv
-from outputs.save_predictions_to_csv import save_predictions_to_csv
+from scripts.save_metrics_to_csv import save_metrics_to_csv
+from scripts.save_predictions_to_csv import save_predictions_to_csv
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 

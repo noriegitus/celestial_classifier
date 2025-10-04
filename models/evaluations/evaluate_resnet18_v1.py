@@ -3,61 +3,98 @@ import torch
 import torch.nn as nn
 from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-# === 1. CONFIGURACIÓN DE RUTAS ========================
+# Bloque para importar funciones de otras carpetas
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from scripts.save_metrics_to_csv import save_metrics_to_csv
+from scripts.save_predictions_to_csv import save_predictions_to_csv
+
+# ============ CONFIGURACIÓN ============
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "pth_files", "model_resnet18_v1.pth")
 DATA_DIR = os.path.join(BASE_DIR, "data", "processed", "test_set_balanced")
 BATCH_SIZE = 64
-class_names = ['elliptical', 'spiral']
+CLASS_NAMES = ['elliptical', 'spiral']
 
-# === 2. TRANSFORMACIONES ================================
+# ============ DISPOSITIVO ============
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Usando dispositivo: {device}")
+
+# ============ TRANSFORMACIÓN ============
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406],  # ImagenNet mean
-                         [0.229, 0.224, 0.225])  # ImagenNet std
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                         std=[0.229, 0.224, 0.225])
 ])
 
-# === 3. CARGAR DATOS =====================================
+# ============ CARGA DE DATOS ============
 dataset = datasets.ImageFolder(DATA_DIR, transform=transform)
 dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=False)
 
-# === 4. CARGAR MODELO ====================================
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# ============ CARGA DE MODELO ============
 model = models.resnet18(weights=None)
-model.fc = nn.Linear(model.fc.in_features, 2)  # Ajustar a tus 2 clases
-model.load_state_dict(torch.load(MODEL_PATH, map_location=device,weights_only=True))
+num_ftrs = model.fc.in_features
+model.fc = nn.Linear(num_ftrs, len(CLASS_NAMES))
+model.load_state_dict(torch.load(MODEL_PATH, map_location=device, weights_only=True))
 model.to(device)
 model.eval()
 
-# === 5. EVALUACIÓN =======================================
-all_preds = []
-all_labels = []
+# ============ EVALUACIÓN ============
+y_true = []
+y_pred = []
+predictions_list = []
+file_index = 0
 
 with torch.no_grad():
     for inputs, labels in dataloader:
         inputs, labels = inputs.to(device), labels.to(device)
         outputs = model(inputs)
-        _, preds = torch.max(outputs, 1)
-        all_preds.extend(preds.cpu().numpy())
-        all_labels.extend(labels.cpu().numpy())
 
-# === 6. REPORTES ========================================
-print("📊 Reporte de clasificación:\n")
-print(classification_report(all_labels, all_preds, target_names=class_names))
+        probs = torch.softmax(outputs, dim=1)
+        confs, preds = torch.max(probs, 1)
+        
+        y_true.extend(labels.cpu().numpy())
+        y_pred.extend(preds.cpu().numpy())
 
-# === 7. MATRIZ DE CONFUSIÓN =============================
-cm = confusion_matrix(all_labels, all_preds)
+        # Guardar detalles de cada predicción
+        for i in range(len(labels)):
+            predictions_list.append({
+                "image": os.path.basename(dataset.samples[file_index][0]),
+                "predicted": CLASS_NAMES[preds[i].item()],
+                "confidence": confs[i].item()
+            })
+            file_index += 1
+
+# ============ REPORTE ============
+print("\n📊 Reporte de clasificación:\n")
+print(classification_report(y_true, y_pred, target_names=CLASS_NAMES))
+
+# ============ MATRIZ DE CONFUSIÓN ============
+cm = confusion_matrix(y_true, y_pred)
 plt.figure(figsize=(6, 5))
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-            xticklabels=class_names, yticklabels=class_names)
-plt.xlabel('Predicted')
-plt.ylabel('True')
-plt.title('Confusion Matrix - ResNet18')
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
+            xticklabels=CLASS_NAMES, yticklabels=CLASS_NAMES)
+plt.xlabel("Predicted")
+plt.ylabel("True")
+plt.title("Matriz de Confusión - ResNet18 v1")
 plt.tight_layout()
 plt.show()
+
+# ============ GUARDAR RESULTADOS ============
+metrics = {
+    "accuracy": accuracy_score(y_true, y_pred),
+    "precision": precision_score(y_true, y_pred, average='binary'),
+    "recall": recall_score(y_true, y_pred, average='binary'),
+    "f1_score": f1_score(y_true, y_pred, average='binary')
+}
+save_metrics_to_csv("resnet18_v1", metrics)
+save_predictions_to_csv("resnet18_v1", predictions_list)
+
+print("Métricas y predicciones para ResNet18 v1 guardadas exitosamente.")

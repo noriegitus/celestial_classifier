@@ -1,0 +1,9 @@
+image,predicted,confidence
+AbellS740.png,spiral,0.9994159936904907
+M49.png,elliptical,1.0
+M87.png,elliptical,1.0
+NGC_474.png,elliptical,1.0
+MilkyWay.png,elliptical,1.0
+N1300.png,spiral,1.0
+NGC_6744.png,spiral,1.0
+NGC_6753.png,spiral,1.0
