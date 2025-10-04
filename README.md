@@ -1,30 +1,48 @@
-# 🪐 Celestial Classifier
+# 🌌 Celestial Classifier 🪐
 
 **Clasificador de Morfología Galáctica** usando imágenes del proyecto [Galaxy Zoo 2](https://data.galaxyzoo.org/). <br>
-Este proyecto busca entrenar un modelo de clasificación de galaxias usando deep learning y visualización científica, con el objetivo a futuro de contribuir a tareas reales de astronomía computacional.
+Este proyecto implementa un **pipeline completo de Machine Learning y Data Engineering.** Se entrenan y evalúan múltiples modelos de Deep Learning (CNN, ResNet18) para clasificar galaxias en dos categorías **(elípticas, espirales)**
+
+El núcleo del proyecto es un pipeline de datos automatizado que extrae, transforma y carga los resultados de las predicciones y los metadatos de las imágenes en una **base de datos PostgreSQL**, dejándola lista para el análisis y la visualización en herramientas de Business Intelligence como **Power BI**.
+
+
 
 
 ## 📁 Estructura del Proyecto
 ```bash
 celestial_classifier/
 │
+├── dashboard/ # Power BI
 ├── data/
-│ ├── raw/ # Datos crudos
-│ │ ├── images_gz2/
-│ │ │ ├── images/ # Imágenes (Windows)
-│ │ │ └── __MACOSX/ # Metadatos (MacOS)
-│ │ ├── gz2_hart16.csv # Etiquetas (morfología)
-│ │ └── gz2_filename_mapping.csv # Relación imagen ↔ objeto
-│ └── processed/ # Dataset listo para entrenamiento
+│  ├── raw/ # Datos crudos
+│  │  ├── images_gz2/
+│  │  │  ├── images/ # Imágenes (Windows)
+│  │  │  └── __MACOSX/ # Metadatos (MacOS)
+│  │  ├── gz2_hart16.csv # Etiquetas (morfología)
+│  │  └── gz2_filename_mapping.csv # Relación imagen ↔ objeto
+│  └── processed/ # Datasets separados y balanceados para entrenamiento y test
+│     ├── all_images/
+│     ├── test_set_balanced/
+│     └── train_set_balanced/
 │
 ├── scripts/
-│ ├── preprocess_data.py # Limpieza y clasificación de imágenes
-│ └── train_model.py # Entrenamiento del modelo
+│  ├── prepare_dataset.py # Balanceo de cantidad de imagenes
+│  ├── preprocess_data.py # Limpieza y clasificación de imágenes
+│  ├── extract_features.py # Calcular valores de interes adicionales
+│  ├── enrich_files.py # Añade 'true_label' y 'is_correct' a las predicciones
+│  ├── load_db.py # Carga datos finales de prediccion a la base de datos
+│  └── enrich_files.py # comparar con is_correct labels
+│
 │
 ├── models/ # Pesos o modelos guardados
-├── notebooks/ # Notebooks exploratorios
-├── dashboard/ # Power BI
-├── sql/ # Consultas SQL
+│  ├── architectures
+│  ├── evaluations
+│  ├── inferences
+│  └── path_files
+│
+├── sql/ # PostgreSQL
+│  ├── architecture/
+│  └── query_scripts/
 ├── README.md
 └── requirements.txt
 ```
@@ -42,16 +60,82 @@ Para poder replicar este clasificador, necesitas descargar los siguientes archiv
 📁 Una vez descargados, descomprime `images_gz2.zip` en la ruta:
 ```"data/raw/images_gz2/"```
 
-## 🚀 Instrucciones de Uso
-1. **Instalar** Dependencias
-```bash
+---
+
+## 🚀 Guía de Instalación y Uso
+
+Sigue estos pasos para configurar y ejecutar el proyecto completo.
+
+### 1. 💾 Configuración Inicial
+
+**Clonar el Repositorio**
+```
+git clone <URL_DE_TU_REPOSITORIO>
+cd celestial_classifier
+```
+
+**Crear un Entorno Virtual (Recomendado)**
+```
+python -m venv venv
+source venv/bin/activate # En Windows: venv\Scripts\activate
+```
+
+**Instalar Dependencias**
+```
 pip install -r requirements.txt
 ```
-2. **Preprocesar** Imágenes
-```bash
-python scripts/preprocess_data.py
+
+
+### 🛢 Configuración de la Base de Datos
+
+- Asegúrate de que PostgreSQL esté instalado y corriendo.
+- Crea una nueva base de datos (ej. `celestial_classifier`).
+- Ejecuta el script `database_setup.sql` para crear todas las tablas (`Model`, `Image`, `Prediction`, etc.) y las relaciones necesarias.
+
+---
+
+### ⚙️ Ejecución del Pipeline de Datos
+
+Ejecuta los scripts en este orden desde la carpeta raíz del proyecto.
+
+**Fase 1: Generar Datos Crudos**
+Ejecuta los modelos para generar los archivos de predicciones y métricas. Ejecuta cada script, tendran nombres de `(model)` distintos. Tienes que ejecutar scripts minimo 5 en total.
+
 ```
-3. **Entrenar** el Modelo
-```bash
-python scripts/train_model.py
+python scripts/evaluate_(model).py
 ```
+
+Extrae los metadatos de todas las imágenes
+```
+python scripts/extract_features.py
+```
+
+**Fase 2: Enriquecer los Datos**
+Añade las etiquetas correctas ('true_label') y la columna 'is_correct'
+```
+python scripts/enrich_files.py
+```
+
+**Fase 3: Cargar a la Base de Datos**
+Limpia las tablas de la base de datos antes de una nueva carga
+
+Ejecutar en psql o pgAdmin:
+```
+TRUNCATE TABLE "Image" CASCADE;
+```
+Carga la tabla "Image" con los datos de todas las fuentes
+```
+python scripts/load_db.py
+```
+
+Finalmente, carga la tabla "Prediction" usando la terminal psql
+Abre psql, conéctate a tu BD y ejecuta el script SQL con los comandos \copy
+
+---
+
+### 📊 Conexión con Power BI
+
+- Abre Power BI.
+- Selecciona "Obtener datos" -> "Base de datos PostgreSQL".
+- Introduce las credenciales de tu servidor y base de datos.
+- ¡Empieza a crear tus dashboards y a explorar los resultados!
