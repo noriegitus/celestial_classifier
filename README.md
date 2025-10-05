@@ -109,18 +109,17 @@ Ejecuta los modelos para generar los archivos de predicciones y métricas. Ejecu
 python scripts/prepare_dataset.py
 python scripts/preprocess_data.py
 ```
-Ejecuta los modelos
 
 Entrena cada modelo:
 ```
-(replace)
+python models/CNN_v1.py
 ```
 Evalúa cada modelo:
 ```
-python scripts/evaluate_resnet18_v1.py
-python scripts/evaluate_resnet18_v2.py
-python scripts/evaluate_v1.py
-python scripts/evaluate_v2.py
+python models/evaluate_resnet18_v1.py
+python models/evaluate_resnet18_v2.py
+python models/evaluate_v1.py
+python models/evaluate_v2.py
 ```
 
 Extrae los metadatos de todas las imágenes:
