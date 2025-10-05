@@ -105,6 +105,10 @@ Ejecuta los scripts en este orden desde la carpeta raíz del proyecto.
 
 **Fase 1: Generar Datos Crudos**
 Ejecuta los modelos para generar los archivos de predicciones y métricas. Ejecuta cada script en orden.
+```
+python scripts/prepare_dataset.py
+python scripts/preprocess_data.py
+```
 
 ```
 python scripts/evaluate_(model).py
