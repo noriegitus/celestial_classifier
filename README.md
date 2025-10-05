@@ -96,7 +96,7 @@ pip install -r requirements.txt
 2. insert_model_evaluation_tables.sql
 3. insert_prediction_table.sql
 4. final_verification.sql
-
+```
 ---
 
 ### ⚙️ Ejecución del Pipeline de Datos
