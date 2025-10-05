@@ -104,7 +104,7 @@ pip install -r requirements.txt
 Ejecuta los scripts en este orden desde la carpeta raíz del proyecto.
 
 **Fase 1: Generar Datos Crudos**
-Ejecuta los modelos para generar los archivos de predicciones y métricas. Ejecuta cada script, tendran nombres de `(model)` distintos. Tienes que ejecutar scripts minimo 5 en total.
+Ejecuta los modelos para generar los archivos de predicciones y métricas. Ejecuta cada script en orden.
 
 ```
 python scripts/evaluate_(model).py
