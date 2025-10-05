@@ -90,13 +90,6 @@ pip install -r requirements.txt
 
 - Asegúrate de que PostgreSQL esté instalado y corriendo.
 - Crea una nueva base de datos (ej. `celestial_classifier`).
-- Ejecuta las sentencias de SQL en orden:
-```
-1. create database.sql
-2. insert_model_evaluation_tables.sql
-3. insert_prediction_table.sql
-4. final_verification.sql
-```
 ---
 
 ### ⚙️ Ejecución del Pipeline de Datos
@@ -151,8 +144,14 @@ Carga la tabla "Image" con los datos de todas las fuentes:
 python scripts/load_db.py
 ```
 
-Finalmente, carga la tabla "Prediction" usando la terminal psql
-Abre psql, conéctate a tu BD y ejecuta el script SQL con los comandos \copy
+Finalmente, carga la tabla "Prediction" **usando la terminal psql❗️**
+Abre psql, conéctate a tu BD y ejecuta en orden los scripts de SQL con los comandos \copy:
+```
+1. create database.sql
+2. insert_model_evaluation_tables.sql
+3. insert_prediction_table.sql
+4. final_verification.sql
+```
 
 ---
 
