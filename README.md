@@ -109,12 +109,21 @@ Ejecuta los modelos para generar los archivos de predicciones y métricas. Ejecu
 python scripts/prepare_dataset.py
 python scripts/preprocess_data.py
 ```
+Ejecuta los modelos
 
+Entrena cada modelo:
 ```
-python scripts/evaluate_(model).py
+(replace)
+```
+Evalúa cada modelo:
+```
+python scripts/evaluate_resnet18_v1.py
+python scripts/evaluate_resnet18_v2.py
+python scripts/evaluate_v1.py
+python scripts/evaluate_v2.py
 ```
 
-Extrae los metadatos de todas las imágenes
+Extrae los metadatos de todas las imágenes:
 ```
 python scripts/extract_features.py
 ```
@@ -132,7 +141,7 @@ Ejecutar en psql o pgAdmin:
 ```
 TRUNCATE TABLE "Image" CASCADE;
 ```
-Carga la tabla "Image" con los datos de todas las fuentes
+Carga la tabla "Image" con los datos de todas las fuentes:
 ```
 python scripts/load_db.py
 ```
