@@ -112,7 +112,12 @@ python scripts/preprocess_data.py
 
 Entrena cada modelo:
 ```
-python models/CNN_v1.py
+python models/cnn_v1.py
+python models/cnn_v2.py
+python models/resnet18_v1.py
+python models/resnet18_v2.py
+python models/resnet18_v3.py
+
 ```
 Evalúa cada modelo:
 ```
