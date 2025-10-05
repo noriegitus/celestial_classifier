@@ -30,9 +30,8 @@ celestial_classifier/
 │  ├── prepare_dataset.py # Balanceo de cantidad de imagenes
 │  ├── preprocess_data.py # Limpieza y clasificación de imágenes
 │  ├── extract_features.py # Calcular valores de interes adicionales
-│  ├── enrich_files.py # Añade 'true_label' y 'is_correct' a las predicciones
-│  ├── load_db.py # Carga datos finales de prediccion a la base de datos
-│  └── enrich_files.py # comparar con is_correct labels
+│  ├── enrich_files.py # Añade 'true_label' y 'is_correct' a las predicciones.
+│  └── load_db.py # Carga datos finales de prediccion a la base de datos
 │
 ├── models/ # Pesos o modelos guardados
 │  ├── architectures
@@ -91,7 +90,12 @@ pip install -r requirements.txt
 
 - Asegúrate de que PostgreSQL esté instalado y corriendo.
 - Crea una nueva base de datos (ej. `celestial_classifier`).
-- Ejecuta el script `database_setup.sql` para crear todas las tablas (`Model`, `Image`, `Prediction`, etc.) y las relaciones necesarias.
+- Ejecuta las sentencias de SQL en orden:
+```
+1. create database.sql
+2. insert_model_evaluation_tables.sql
+3. insert_prediction_table.sql
+4. final_verification.sql
 
 ---
 
