@@ -1,7 +1,7 @@
 # 🌌 Celestial Classifier 🪐
 
 **Clasificador de Morfología Galáctica** usando imágenes del proyecto [Galaxy Zoo 2](https://data.galaxyzoo.org/). <br>
-Este proyecto implementa un **pipeline completo de Machine Learning y Data Engineering.** Se entrenan y evalúan múltiples modelos de Deep Learning (CNN, ResNet18) para clasificar galaxias en dos categorías **(elípticas, espirales)**
+Este proyecto implementa un **pipeline completo de Machine Learning y Data Engineering.** Se entrenan y evalúan dos modelos de Deep Learning (CNN, ResNet18) para clasificar galaxias en dos categorías **(elípticas, espirales)**
 
 El núcleo del proyecto es un pipeline de datos automatizado que extrae, transforma y carga los resultados de las predicciones y los metadatos de las imágenes en una **base de datos PostgreSQL**, dejándola lista para el análisis y la visualización en herramientas de Business Intelligence como **Power BI**.
 
