@@ -117,8 +117,8 @@ python models/cnn_v2.py
 python models/resnet18_v1.py
 python models/resnet18_v2.py
 python models/resnet18_v3.py
-
 ```
+
 Evalúa cada modelo:
 ```
 python models/evaluate_resnet18_v1.py
@@ -145,6 +145,7 @@ Ejecutar en psql o pgAdmin:
 ```
 TRUNCATE TABLE "Image" CASCADE;
 ```
+
 Carga la tabla "Image" con los datos de todas las fuentes:
 ```
 python scripts/load_db.py
