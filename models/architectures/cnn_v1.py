@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 def main():
     # 1. PATH CONFIG -------------------------------------------
     BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-    DATA_DIR = os.path.join(BASE, "data", "processed", "train_set_balanced")
+    DATA_DIR = os.path.join(BASE, "data", "final", "train")
     MODEL_PATH = os.path.join(BASE, "models", "pth_files", "model_cc_v1.pth")
 
     # 2. HYPERPARAMETERS ---------------------------------------

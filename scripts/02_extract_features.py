@@ -39,7 +39,7 @@ def extract_image_features(file_path, source):
             'source': source, 'folder': folder
         }
     except Exception as e:
-        print(f"Error procesando {filename}: {e}")
+        print(f"Error procesando {file_path.name}: {e}")
         return None
 
 # --- SCRIPT PRINCIPAL (MODIFICADO) ---
@@ -49,11 +49,11 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # En lugar de una sola ruta, creamos una lista de carpetas para procesar.
 SOURCES_TO_PROCESS = [
     {
-        "path": PROJECT_ROOT / 'data' / 'processed' / 'test_set_balanced',
+        "path": PROJECT_ROOT / 'data' / 'final' / 'test',
         "source_name": "Galaxy Zoo 2"
     },
     {
-        "path": PROJECT_ROOT / 'data' / 'processed' / 'external_img',
+        "path": PROJECT_ROOT / 'data' / 'raw' / 'external_img',
         "source_name": "External Test"
     }
 ]
@@ -87,6 +87,7 @@ for source_info in SOURCES_TO_PROCESS:
 # Guardar el resultado UNIFICADO en un solo archivo
 features_df = pd.DataFrame(all_features)
 output_csv_path = PROJECT_ROOT / 'outputs' / 'images_metadata_master.csv'
+output_csv_path.parent.mkdir(parents=True, exist_ok=True) # aseguramos que la carpeta outputs exista
 features_df.to_csv(output_csv_path, index=False)
 
 print(f"\nProceso completado!")

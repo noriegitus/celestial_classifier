@@ -12,15 +12,14 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from scripts.save_metrics_to_csv import save_metrics_to_csv
-from scripts.save_predictions_to_csv import save_predictions_to_csv
+from scripts.utils import save_metrics_to_csv, save_predictions_to_csv
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 
 # ============ CONFIGURACIÓN ============
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "pth_files", "model_resnet18_v3.pth")
-DATA_DIR = os.path.join(BASE_DIR, "data", "processed", "test_set_balanced")
+DATA_DIR = os.path.join(BASE_DIR, "data", "final", "test")
 BATCH_SIZE = 64
 CLASS_NAMES = ['elliptical', 'spiral']
 
@@ -48,13 +47,13 @@ model.load_state_dict(torch.load(MODEL_PATH, map_location=device, weights_only=T
 model.to(device)
 model.eval()
 
-predictions = []
+predictions_list = []
 
 
 # ============ EVALUACIÓN ============
 y_true = []
 y_pred = []
-predictions = []
+predictions_list = []
 
 with torch.no_grad():
     for inputs, labels in dataloader:
@@ -68,7 +67,7 @@ with torch.no_grad():
         y_pred.extend(preds.cpu().numpy())
 
         for i in range(len(labels)):
-            predictions.append({
+            predictions_list.append({
                 "image": dataset.samples[i][0].split(os.sep)[-1],
                 "predicted": CLASS_NAMES[preds[i].item()],
                 "confidence": confs[i].item()
@@ -98,4 +97,4 @@ metrics = {
     "f1_score": f1_score(y_true, y_pred)
 }
 save_metrics_to_csv("resnet18_v3", metrics)
-save_predictions_to_csv("resnet18_v3", predictions)
+save_predictions_to_csv("resnet18_v3", predictions_list)

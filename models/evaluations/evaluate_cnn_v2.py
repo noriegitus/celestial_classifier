@@ -10,16 +10,13 @@ import matplotlib.pyplot as plt
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent))
-
-from scripts.save_metrics_to_csv import save_metrics_to_csv
-from scripts.save_predictions_to_csv import save_predictions_to_csv
-
+from scripts.utils import save_metrics_to_csv, save_predictions_to_csv
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 # === 1. CONFIGURACIÓN =====================
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "pth_files", "model_cnn_v2.pth")
-DATA_DIR = os.path.join(BASE_DIR, "data", "processed", "test_set_balanced")
+DATA_DIR = os.path.join(BASE_DIR, "data", "final", "test")
 BATCH_SIZE = 64
 class_names = ['elliptical', 'spiral']
 
@@ -71,7 +68,7 @@ model.eval()
 # === 6. EVALUACIÓN ========================
 y_true = []
 y_pred = []
-predictions = []
+predictions_list = []
 
 
 with torch.no_grad():
@@ -83,7 +80,7 @@ with torch.no_grad():
         confidences, predicted_classes = torch.max(probs, 1)
 
         for i in range(len(labels)):
-            predictions.append({
+            predictions_list.append({
                 "image": dataset.samples[i][0].split(os.sep)[-1],
                 "predicted": class_names[predicted_classes[i].item()],
                 "confidence": confidences[i].item()
@@ -116,7 +113,7 @@ plt.title("Matriz de Confusión")
 plt.tight_layout()
 plt.show()
 
-save_predictions_to_csv("cnn_v2", predictions)
+save_predictions_to_csv("cnn_v2", predictions_list)
 
 # === 9. PAUSA MANUAL ========================
 input("\nPresiona Enter para salir...")

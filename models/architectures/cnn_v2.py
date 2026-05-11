@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader, random_split
 # =======================
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-DATA_DIR = os.path.join(BASE_DIR, "data", "processed", "train_set_balanced")
+DATA_DIR = os.path.join(BASE_DIR, "data", "final", "train")
 MODEL_PATH = os.path.join(BASE_DIR, "models", "pth_files", "model_cnn_v2.pth")
 
 BATCH_SIZE = 128

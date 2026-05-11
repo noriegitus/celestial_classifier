@@ -12,13 +12,12 @@ import numpy as np
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent))
-from scripts.save_metrics_to_csv import save_metrics_to_csv
-from scripts.save_predictions_to_csv import save_predictions_to_csv
+from scripts.utils import save_metrics_to_csv, save_predictions_to_csv
 
 # ============ CONFIGURACIÓN ============
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "pth_files", "model_resnet18_v2.pth")
-DATA_DIR = os.path.join(BASE_DIR, "data", "processed", "test_set_balanced")
+DATA_DIR = os.path.join(BASE_DIR, "data", "final", "test")
 BATCH_SIZE = 64
 CLASS_NAMES = ['elliptical', 'spiral']
 

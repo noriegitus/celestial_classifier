@@ -23,7 +23,7 @@ class CNN(nn.Module):
 # --- CONFIGURACIÓN ---
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 MODELS_FOLDER = PROJECT_ROOT / 'models' / 'pth_files'
-DATA_FOLDER = PROJECT_ROOT / 'data' / 'processed' / 'external_img'
+DATA_FOLDER = PROJECT_ROOT / 'data' / 'raw' / 'external_img'
 OUTPUT_FOLDER = PROJECT_ROOT / 'outputs' / 'csvs'
 OUTPUT_FOLDER.mkdir(exist_ok=True)
 
