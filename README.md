@@ -1,7 +1,7 @@
 # 🌌 Celestial Classifier 🪐
 
 **Clasificador de Morfología Galáctica** usando imágenes del proyecto [Galaxy Zoo 2](https://data.galaxyzoo.org/). <br>
-Este proyecto implementa un **pipeline completo de Machine Learning y Data Engineering.** Se entrenan y evalúan múltiples modelos de Deep Learning (CNN, ResNet18) para clasificar galaxias en dos categorías **(elípticas, espirales)**
+Este proyecto implementa un **pipeline completo de Machine Learning y Data Engineering.** Se entrenan y evalúan dos modelos de Deep Learning (CNN, ResNet18) para clasificar galaxias en dos categorías **(elípticas, espirales)**
 
 El núcleo del proyecto es un pipeline de datos automatizado que extrae, transforma y carga los resultados de las predicciones y los metadatos de las imágenes en una **base de datos PostgreSQL**, dejándola lista para el análisis y la visualización en herramientas de Business Intelligence como **Power BI**.
 
@@ -13,6 +13,7 @@ El núcleo del proyecto es un pipeline de datos automatizado que extrae, transfo
 celestial_classifier/
 │
 ├── dashboard/ # Power BI
+│
 ├── data/
 │  ├── raw/ # Datos crudos
 │  │  ├── images_gz2/
@@ -29,10 +30,8 @@ celestial_classifier/
 │  ├── prepare_dataset.py # Balanceo de cantidad de imagenes
 │  ├── preprocess_data.py # Limpieza y clasificación de imágenes
 │  ├── extract_features.py # Calcular valores de interes adicionales
-│  ├── enrich_files.py # Añade 'true_label' y 'is_correct' a las predicciones
-│  ├── load_db.py # Carga datos finales de prediccion a la base de datos
-│  └── enrich_files.py # comparar con is_correct labels
-│
+│  ├── enrich_files.py # Añade 'true_label' y 'is_correct' a las predicciones.
+│  └── load_db.py # Carga datos finales de prediccion a la base de datos
 │
 ├── models/ # Pesos o modelos guardados
 │  ├── architectures
@@ -43,6 +42,7 @@ celestial_classifier/
 ├── sql/ # PostgreSQL
 │  ├── architecture/
 │  └── query_scripts/
+│
 ├── README.md
 └── requirements.txt
 ```
@@ -70,7 +70,7 @@ Sigue estos pasos para configurar y ejecutar el proyecto completo.
 
 **Clonar el Repositorio**
 ```
-git clone <URL_DE_TU_REPOSITORIO>
+git clone https://github.com/noriegitus/celestial_classifier.git
 cd celestial_classifier
 ```
 
@@ -90,8 +90,6 @@ pip install -r requirements.txt
 
 - Asegúrate de que PostgreSQL esté instalado y corriendo.
 - Crea una nueva base de datos (ej. `celestial_classifier`).
-- Ejecuta el script `database_setup.sql` para crear todas las tablas (`Model`, `Image`, `Prediction`, etc.) y las relaciones necesarias.
-
 ---
 
 ### ⚙️ Ejecución del Pipeline de Datos
@@ -99,13 +97,30 @@ pip install -r requirements.txt
 Ejecuta los scripts en este orden desde la carpeta raíz del proyecto.
 
 **Fase 1: Generar Datos Crudos**
-Ejecuta los modelos para generar los archivos de predicciones y métricas. Ejecuta cada script, tendran nombres de `(model)` distintos. Tienes que ejecutar scripts minimo 5 en total.
-
+Ejecuta los modelos para generar los archivos de predicciones y métricas. Ejecuta cada script en orden.
 ```
-python scripts/evaluate_(model).py
+python scripts/prepare_dataset.py
+python scripts/preprocess_data.py
 ```
 
-Extrae los metadatos de todas las imágenes
+Entrena cada modelo:
+```
+python models/cnn_v1.py
+python models/cnn_v2.py
+python models/resnet18_v1.py
+python models/resnet18_v2.py
+python models/resnet18_v3.py
+```
+
+Evalúa cada modelo:
+```
+python models/evaluate_resnet18_v1.py
+python models/evaluate_resnet18_v2.py
+python models/evaluate_v1.py
+python models/evaluate_v2.py
+```
+
+Extrae los metadatos de todas las imágenes:
 ```
 python scripts/extract_features.py
 ```
@@ -123,13 +138,20 @@ Ejecutar en psql o pgAdmin:
 ```
 TRUNCATE TABLE "Image" CASCADE;
 ```
-Carga la tabla "Image" con los datos de todas las fuentes
+
+Carga la tabla "Image" con los datos de todas las fuentes:
 ```
 python scripts/load_db.py
 ```
 
-Finalmente, carga la tabla "Prediction" usando la terminal psql
-Abre psql, conéctate a tu BD y ejecuta el script SQL con los comandos \copy
+Finalmente, carga la tabla "Prediction" **usando la terminal psql❗️**
+Abre psql, conéctate a tu BD y ejecuta en orden los scripts de SQL con los comandos \copy:
+```
+1. create database.sql
+2. insert_model_evaluation_tables.sql
+3. insert_prediction_table.sql
+4. final_verification.sql
+```
 
 ---
 
