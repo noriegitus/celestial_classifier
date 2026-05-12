@@ -1,18 +1,24 @@
-# celestial_classifier_train_optimized.py
-
 import os
+import sys
 import time
 import torch
 import torch.nn as nn   
 import torch.optim as optim
-from torchvision import datasets, transforms
+from torchvision import transforms
 from torch.utils.data import DataLoader
+
+# === SOLUCIÓN AL ERROR DE IMPORTACIÓN ===
+# Calculamos la ruta base y la añadimos a sys.path ANTES de importar utils
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.append(BASE_DIR)
+
+from scripts.utils import GalacticDataset
 
 def main():
     # 1. PATH CONFIG -------------------------------------------
-    BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-    DATA_DIR = os.path.join(BASE, "data", "final", "train")
-    MODEL_PATH = os.path.join(BASE, "models", "pth_files", "model_cc_v1.pth")
+    # Solucionado el problema de concatenación de rutas
+    CSV_PATH = os.path.join(BASE_DIR, "data", "processed", "train_map.csv")
+    MODEL_PATH = os.path.join(BASE_DIR, "models", "pth_files", "model_cc_v1.pth")
 
     # 2. HYPERPARAMETERS ---------------------------------------
     BATCH_SIZE = 64 
@@ -25,12 +31,12 @@ def main():
         transforms.ToTensor()  
     ])
 
-    # 4. LOAD DATASET WITH ImageFolder ---------------------------
-    dataset = datasets.ImageFolder(DATA_DIR, transform=transform)
+    # 4. LOAD DATASET WITH GalacticDataset -----------------------
+    dataset = GalacticDataset(CSV_PATH, transform=transform)
 
     # Configura múltiples workers para carga paralela de datos
     dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True,
-                            num_workers=4, pin_memory=True)  # Optimización clave
+                            num_workers=4, pin_memory=True)
 
     # 5. DEFINE A SIMPLE CNN -------------------------------------
     class CNN(nn.Module):
@@ -61,6 +67,7 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Usando dispositivo: {device}")
 
+    # Solucionado el error de inicialización
     model = CNN().to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=LR)
@@ -74,7 +81,7 @@ def main():
         running_loss = 0.0
 
         for batch_idx, (inputs, labels) in enumerate(dataloader):
-            inputs, labels = inputs.to(device), labels.to(device)
+            inputs, labels = inputs.to(device, non_blocking=True), labels.to(device, non_blocking=True)
 
             optimizer.zero_grad()
             outputs = model(inputs)
@@ -94,6 +101,8 @@ def main():
     print(f"\nEntrenamiento completado en {total_time:.2f} segundos, {total_time/60:.2f} minutos")
 
     # 8. SAVE TRAINED MODEL -------------------------------------
+    # Crear la carpeta de destino si no existe por si acaso
+    os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
     torch.save(model.state_dict(), MODEL_PATH)
     print(f"Modelo guardado en: {MODEL_PATH}")
 

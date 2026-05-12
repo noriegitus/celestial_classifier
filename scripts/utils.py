@@ -1,5 +1,9 @@
 import os
 import csv
+import torch
+from torch.utils.data import Dataset
+from PIL import Image
+import pandas as pd
 
 def save_predictions_to_csv(model_name, predictions, output_dir="outputs/csvs"):
     """
@@ -41,3 +45,22 @@ def save_metrics_to_csv(model_name, metrics_dict, output_dir="outputs/csvs"):
             writer.writerow([key, f"{value:.4f}"])
 
     print(f"Métricas guardadas en: {output_file}")
+
+
+class GalacticDataset(Dataset):
+    def __init__(self, csv_file, transform=None):
+        self.data = pd.read_csv(csv_file)
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        img_path = self.data.iloc[idx, 0] # Columna 'path'
+        label = int(self.data.iloc[idx, 1]) # Columna 'label'
+        
+        image = Image.open(img_path).convert("RGB")
+        if self.transform:
+            image = self.transform(image)
+            
+        return image, label

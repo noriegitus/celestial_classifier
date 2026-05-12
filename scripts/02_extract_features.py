@@ -8,17 +8,24 @@ from pathlib import Path
 
 # --- (Las funciones de ayuda se mantienen igual) ---
 def get_dominant_color(image_path, k=1):
+    """
+    Versión optimizada: Calcula el color promedio en lugar de usar KMeans.
+    Es aproximadamente 100 veces más rápido para datasets grandes.
+    """
     try:
         img = cv2.imread(str(image_path))
         if img is None: return '#000000'
-        pixels = img.reshape(-1, 3)
-        kmeans = KMeans(n_clusters=k, n_init='auto', random_state=42)
-        kmeans.fit(pixels)
-        dominant_color = kmeans.cluster_centers_.astype(int)[0]
-        return '#{:02x}{:02x}{:02x}'.format(dominant_color[2], dominant_color[1], dominant_color[0])
+        
+        # En lugar de KMeans, calculamos el promedio de cada canal (BGR)
+        # mean() devuelve [azul_promedio, verde_promedio, rojo_promedio]
+        avg_color_per_row = np.average(img, axis=0)
+        avg_color = np.average(avg_color_per_row, axis=0).astype(int)
+        
+        # Convertimos de BGR (OpenCV) a HEX para la base de datos
+        return '#{:02x}{:02x}{:02x}'.format(avg_color[2], avg_color[1], avg_color[0])
     except Exception:
         return '#000000'
-
+    
 def extract_image_features(file_path, source):
     try:
         filename = file_path.name

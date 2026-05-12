@@ -1,28 +1,33 @@
 import os
+import sys
 import time
 import copy
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision import datasets, transforms
+from torchvision import transforms
 from torch.utils.data import DataLoader, random_split
 
-# =======================
-# 1. CONFIGURACIÓN GENERAL
-# =======================
-
+# === CONFIGURACIÓN DE RUTAS (Arreglado para evitar errores de concatenación) ===
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-DATA_DIR = os.path.join(BASE_DIR, "data", "final", "train")
+sys.path.append(BASE_DIR)
+
+from scripts.utils import GalacticDataset
+
+# Rutas de archivos
+CSV_PATH = os.path.join(BASE_DIR, "data", "processed", "train_map.csv")
 MODEL_PATH = os.path.join(BASE_DIR, "models", "pth_files", "model_cnn_v2.pth")
 
+# Hiperparámetros
 BATCH_SIZE = 128
 EPOCHS = 30
 LR = 0.0005
-PATIENCE = 5  # para early stopping
+PATIENCE = 5 
 
 # =======================
 # 2. TRANSFORMACIONES
 # =======================
+# Nota: GalacticDataset aplicará estas transformaciones al vuelo
 transform_train = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.RandomHorizontalFlip(),
@@ -37,14 +42,18 @@ transform_val = transforms.Compose([
 ])
 
 # =======================
-# 3. CARGA DE DATOS
+# 3. CARGA DE DATOS (Enfoque Profesional)
 # =======================
-full_dataset = datasets.ImageFolder(DATA_DIR, transform=transform_train)
+# Cargamos el dataset completo desde el CSV
+full_dataset = GalacticDataset(CSV_PATH, transform=transform_train)
+
+# División lógica
 total_size = len(full_dataset)
 val_size = int(0.2 * total_size)
 train_size = total_size - val_size
-
 train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size])
+
+# Aplicamos la transformación de validación (sin aumentos) al subset de validación
 val_dataset.dataset.transform = transform_val
 
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4, pin_memory=True)
@@ -78,7 +87,7 @@ class CNN_v2(nn.Module):
         return x
 
 # =======================
-# 5. ENTRENAMIENTO CON EARLY STOPPING
+# 5. ENTRENAMIENTO
 # =======================
 def train():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -97,6 +106,8 @@ def train():
     for epoch in range(EPOCHS):
         model.train()
         running_loss = 0.0
+        
+        # --- Bucle de Entrenamiento ---
         for inputs, labels in train_loader:
             inputs, labels = inputs.to(device), labels.to(device)
             optimizer.zero_grad()
@@ -106,40 +117,43 @@ def train():
             optimizer.step()
             running_loss += loss.item()
 
-            avg_train_loss = running_loss / len(train_loader)
+        avg_train_loss = running_loss / len(train_loader)
 
-            # === VALIDACIÓN ===
-            model.eval()
-            val_loss = 0.0
-            with torch.no_grad():
-                for inputs, labels in val_loader:
-                    inputs, labels = inputs.to(device), labels.to(device)
-                    outputs = model(inputs)
-                    loss = criterion(outputs, labels)
-                    val_loss += loss.item()
-            avg_val_loss = val_loss / len(val_loader)
-
-
-            # EARLY STOPPING
-            if avg_val_loss < best_loss:
-                best_loss = avg_val_loss
-                best_model_wts = copy.deepcopy(model.state_dict())
-                epochs_no_improve = 0
-            else:
-                epochs_no_improve += 1
-                if epochs_no_improve >= PATIENCE:
-                    print("Early stopping activado")
-                    break
+        # --- Bucle de Validación ---
+        model.eval()
+        val_loss = 0.0
+        with torch.no_grad():
+            for inputs, labels in val_loader:
+                inputs, labels = inputs.to(device), labels.to(device)
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+                val_loss += loss.item()
         
-        print(f"Época {epoch+1}/{EPOCHS} | Pérdida entrenamiento: {avg_train_loss:.4f} | Validación: {avg_val_loss:.4f}\n")
-        
+        avg_val_loss = val_loss / len(val_loader)
 
+        # Imprimir progreso por ÉPOCA (movido fuera del bucle de batches para claridad)
+        print(f"Época {epoch+1}/{EPOCHS} | Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f}")
+
+        # --- Lógica de Early Stopping ---
+        if avg_val_loss < best_loss:
+            best_loss = avg_val_loss
+            best_model_wts = copy.deepcopy(model.state_dict())
+            epochs_no_improve = 0
+            # Guardar checkpoint intermedio si prefieres
+        else:
+            epochs_no_improve += 1
+            if epochs_no_improve >= PATIENCE:
+                print(f" Early stopping activado en época {epoch+1}")
+                break
+        
     total_time = time.time() - start_time
-    print(f"Entrenamiento completado en {total_time:.2f} segundos")
+    print(f"\nEntrenamiento completado en {total_time/60:.2f} minutos")
 
+    # Guardar el mejor modelo encontrado
     model.load_state_dict(best_model_wts)
+    os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
     torch.save(model.state_dict(), MODEL_PATH)
-    print(f"Modelo guardado en: {MODEL_PATH}")
+    print(f"Mejor modelo guardado en: {MODEL_PATH}")
 
 if __name__ == '__main__':
     train()
